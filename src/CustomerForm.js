@@ -10,5 +10,7 @@ export const CustomerForm = ({ original }) => (
       value={original.firstName}
       readOnly
     />
+
+    <input type="submit" value="add" />
   </form>
 );
