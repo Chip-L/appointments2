@@ -19,6 +19,9 @@ describe("AppointmentForm", () => {
   });
 
   describe("service field", () => {
+    const labelsOfAllOptions = (element) =>
+      Array.from(element.childNodes, (node) => node.textContent);
+
     it("renders as a select box", () => {
       render(<AppointmentForm />);
 
@@ -31,6 +34,16 @@ describe("AppointmentForm", () => {
 
       const firstOption = field("service").childNodes[0];
       expect(firstOption.value).toEqual("");
+    });
+
+    it("lists all salon services", () => {
+      const services = ["Cut", "Blow-dry"];
+
+      render(<AppointmentForm selectableServices={services} />);
+
+      expect(labelsOfAllOptions(field("service"))).toEqual(
+        expect.arrayContaining(services)
+      );
     });
   });
 });
