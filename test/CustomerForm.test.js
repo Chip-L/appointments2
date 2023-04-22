@@ -2,10 +2,10 @@ import React from "react";
 import {
   change,
   click,
-  element,
   field,
   form,
   initializeReactContainer,
+  labelFor,
   render,
   submit,
   submitButton,
@@ -49,7 +49,7 @@ describe("CustomerForm", () => {
 
       expect(field(fieldName)).not.toBeNull();
       expect(field(fieldName).tagName).toEqual("INPUT");
-      expect(field(fieldName).type).toEqual("text"); //this is by default
+      expect(field(fieldName)).toBeInputFieldOfType("text"); //this is by default
     });
 
   const itIncludesTheExistingValue = (fieldName, value) =>
@@ -61,18 +61,16 @@ describe("CustomerForm", () => {
     });
 
   const itRendersALabel = (fieldName, text) => {
-    const label = () => element(`label[for=${fieldName}]`);
-
     it("renders a label for the text box", () => {
       render(<CustomerForm original={blankCustomer} />);
 
-      expect(label()).not.toBeNull();
+      expect(labelFor(fieldName)).not.toBeNull();
     });
 
-    it(`renders '${text}' as the first name label`, () => {
+    it(`renders '${text}' as the label`, () => {
       render(<CustomerForm original={blankCustomer} />);
 
-      expect(label()).toContainText(text);
+      expect(labelFor(fieldName)).toContainText(text);
     });
   };
 

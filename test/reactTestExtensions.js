@@ -54,3 +54,5 @@ export const form = (id) => element("form");
 export const field = (fieldName) => form().elements[fieldName];
 
 export const submitButton = () => element("input[type=submit]");
+
+export const labelFor = (fieldName) => element(`label[for=${fieldName}]`);
