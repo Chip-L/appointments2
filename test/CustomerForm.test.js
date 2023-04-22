@@ -1,6 +1,8 @@
 import React from "react";
 import {
+  element,
   elements,
+  field,
   form,
   initializeReactContainer,
   render,
@@ -25,21 +27,36 @@ describe("CustomerForm", () => {
   it("renders the first name field as a text box", () => {
     render(<CustomerForm original={blankCustomer} />);
 
-    // the commented lines are removed when we change the reference to call the element by name. This is more precise, and has gotten there by building the form element up using the other tests.
-    // const field = form().elements[0];
-    const field = form().elements.firstName;
-
-    // expect(field).not.toBeNull();
-    expect(field.tagName).toEqual("INPUT");
-    // expect(field.name).toEqual("firstName");
-    expect(field.type).toEqual("text");
+    expect(field("firstName").tagName).toEqual("INPUT");
+    expect(field("firstName").type).toEqual("text");
   });
 
   it("includes the existing value for the first name", () => {
     const customer = { firstName: "Ashley" };
     render(<CustomerForm original={customer} />);
 
-    const field = form().elements.firstName;
-    expect(field.value).toEqual(customer.firstName);
+    expect(field("firstName").value).toEqual(customer.firstName);
+  });
+
+  it("renders a label for the first name field", () => {
+    render(<CustomerForm original={blankCustomer} />);
+
+    const label = element("label[for=firstName]");
+
+    expect(label).not.toBeNull();
+  });
+
+  it("renders 'First Name' as the first name label", () => {
+    render(<CustomerForm original={blankCustomer} />);
+
+    const label = element("label[for=firstName]");
+
+    expect(label).toContainText("First Name");
+  });
+
+  it("assigns an id that matches the label id to the first name field", () => {
+    render(<CustomerForm original={blankCustomer} />);
+
+    expect(field("firstName").id).toEqual("firstName");
   });
 });
