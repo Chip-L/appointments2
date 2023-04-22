@@ -13,6 +13,16 @@ export const render = (component) =>
 
 export const click = (element) => act(() => element.click());
 
+export const submit = (formElement) => {
+  const event = new Event("submit", {
+    bubbles: true,
+    cancelable: true,
+  });
+
+  act(() => formElement.dispatchEvent(event));
+  return event;
+};
+
 export const element = (selector) => document.querySelector(selector);
 
 export const elements = (selector) =>
