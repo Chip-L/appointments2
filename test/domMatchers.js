@@ -1,4 +1,9 @@
+import { toBeInputFieldOfType } from "./matchers/toBeInputFieldOfType";
 import { toContainText } from "./matchers/toContainText";
 import { toHaveClass } from "./matchers/toHaveClass";
 
-expect.extend({ toContainText, toHaveClass });
+expect.extend({
+  toBeInputFieldOfType,
+  toContainText,
+  toHaveClass,
+});
