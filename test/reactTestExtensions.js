@@ -35,3 +35,5 @@ export const textOf = (elements) => elements.map((el) => el.textContent);
 export const form = (id) => element("form");
 
 export const field = (fieldName) => form().elements[fieldName];
+
+export const submitButton = () => element("input[type=submit]");
