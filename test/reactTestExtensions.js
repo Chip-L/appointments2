@@ -21,3 +21,5 @@ export const elements = (selector) =>
 export const typesOf = (elements) => elements.map((el) => el.type);
 
 export const textOf = (elements) => elements.map((el) => el.textContent);
+
+export const form = (id) => element("form");
