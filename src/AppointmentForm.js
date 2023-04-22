@@ -1,3 +1,9 @@
 import React from "react";
 
-export const AppointmentForm = () => null;
+export const AppointmentForm = () => (
+  <form>
+    <select name="service">
+      <option />
+    </select>
+  </form>
+);
