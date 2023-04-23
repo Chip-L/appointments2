@@ -125,6 +125,7 @@ export const AppointmentForm = ({
           <option key={service}>{service}</option>
         ))}
       </select>
+
       <TimeSlotTable
         salonOpensAt={salonOpensAt}
         salonClosesAt={salonClosesAt}
@@ -132,6 +133,8 @@ export const AppointmentForm = ({
         availableTimeSlots={availableTimeSlots}
         checkedTimeSlot={original.startsAt}
       />
+
+      <input type="submit" value="Add" />
     </form>
   );
 };
