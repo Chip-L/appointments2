@@ -60,7 +60,7 @@ describe("AppointmentForm", () => {
       render(<AppointmentForm {...testProps} />);
 
       expect(field("service")).not.toBeNull();
-      expect(field("service").tagName).toEqual("SELECT");
+      expect(field("service")).toBeElementWithTag("SELECT");
     });
 
     it("has a blank value as the first value", () => {
