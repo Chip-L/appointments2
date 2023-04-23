@@ -48,26 +48,6 @@ describe("AppointmentForm", () => {
     expect(submitButton()).not.toBeNull();
   });
 
-  it("saves the existing value when submitted", () => {
-    expect.hasAssertions();
-
-    const appointment = {
-      startsAt: availableTimeSlots[1].startsAt,
-    };
-    render(
-      <AppointmentForm
-        original={appointment}
-        availableTimeSlots={availableTimeSlots}
-        today={today}
-        onSubmit={({ startsAt }) =>
-          expect(startsAt).toEqual(availableTimeSlots[1].startsAt)
-        }
-      />
-    );
-
-    click(submitButton());
-  });
-
   describe("service field", () => {
     const services = ["Cut", "Blow-dry"];
 
@@ -261,6 +241,47 @@ describe("AppointmentForm", () => {
       );
 
       expect(startsAtField(1).checked).toBe(true);
+    });
+
+    it("saves the existing value when submitted", () => {
+      expect.hasAssertions();
+
+      const appointment = {
+        startsAt: availableTimeSlots[1].startsAt,
+      };
+      render(
+        <AppointmentForm
+          original={appointment}
+          availableTimeSlots={availableTimeSlots}
+          today={today}
+          onSubmit={({ startsAt }) =>
+            expect(startsAt).toEqual(availableTimeSlots[1].startsAt)
+          }
+        />
+      );
+
+      click(submitButton());
+    });
+
+    it("save a new value when submitted", () => {
+      expect.hasAssertions();
+
+      const appointment = {
+        startsAt: availableTimeSlots[0],
+      };
+      render(
+        <AppointmentForm
+          original={appointment}
+          availableTimeSlots={availableTimeSlots}
+          today={today}
+          onSubmit={({ startsAt }) =>
+            expect(startsAt).toEqual(availableTimeSlots[1].startsAt)
+          }
+        />
+      );
+
+      click(startsAtField(1));
+      click(submitButton());
     });
   });
 });
