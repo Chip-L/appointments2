@@ -105,6 +105,8 @@ describe("AppointmentForm", () => {
   });
 
   describe("time slot table", () => {
+    const startsAtField = (index) => elements("input[name=startsAt]")[index];
+
     it("renders a table for time slots with an id", () => {
       render(
         <AppointmentForm
@@ -198,7 +200,7 @@ describe("AppointmentForm", () => {
       expect(elements("input[type=radio]")).toHaveLength(0);
     });
 
-    it("sets rdaio buton values to the startsAt value of the corresponding appointment", () => {
+    it("sets radio button values to the startsAt value of the corresponding appointment", () => {
       render(
         <AppointmentForm
           original={blankAppointment}
@@ -213,6 +215,19 @@ describe("AppointmentForm", () => {
       const allSlotTimes = availableTimeSlots.map(({ startsAt }) => startsAt);
 
       expect(allRadioValues).toEqual(allSlotTimes);
+    });
+
+    it("pre-selects the existing value", () => {
+      const appointment = { startsAt: availableTimeSlots[1].startsAt };
+      render(
+        <AppointmentForm
+          original={appointment}
+          availableTimeSlots={availableTimeSlots}
+          today={today}
+        />
+      );
+
+      expect(startsAtField(1).checked).toBe(true);
     });
   });
 });

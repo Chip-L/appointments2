@@ -40,15 +40,29 @@ const mergeDateAndTime = (date, timeSlot) => {
   );
 };
 
-const RadioButtonIfAvailable = ({ availableTimeSlots, date, timeSlot }) => {
+const RadioButtonIfAvailable = ({
+  availableTimeSlots,
+  date,
+  timeSlot,
+  checkedTimeSlot,
+}) => {
   const startsAt = mergeDateAndTime(date, timeSlot);
+  const isChecked = startsAt === checkedTimeSlot;
 
   if (
     availableTimeSlots.some(
       (availableTimeSlot) => availableTimeSlot.startsAt === startsAt
     )
   ) {
-    return <input name="startAt" type="radio" value={startsAt} />;
+    return (
+      <input
+        name="startsAt"
+        type="radio"
+        value={startsAt}
+        checked={isChecked}
+        readOnly
+      />
+    );
   }
 
   return null;
@@ -59,6 +73,7 @@ const TimeSlotTable = ({
   salonClosesAt,
   today,
   availableTimeSlots,
+  checkedTimeSlot,
 }) => {
   const timeSlots = dailyTimeSlots(salonOpensAt, salonClosesAt);
   const dates = weeklyDateValues(today);
@@ -83,6 +98,7 @@ const TimeSlotTable = ({
                   availableTimeSlots={availableTimeSlots}
                   date={date}
                   timeSlot={timeSlot}
+                  checkedTimeSlot={checkedTimeSlot}
                 />
               </td>
             ))}
@@ -100,22 +116,25 @@ export const AppointmentForm = ({
   salonClosesAt,
   today,
   availableTimeSlots,
-}) => (
-  <form>
-    <select name="service" value={original.service} readOnly>
-      <option />
-      {selectableServices.map((service) => (
-        <option key={service}>{service}</option>
-      ))}
-    </select>
-    <TimeSlotTable
-      salonOpensAt={salonOpensAt}
-      salonClosesAt={salonClosesAt}
-      today={today}
-      availableTimeSlots={availableTimeSlots}
-    />
-  </form>
-);
+}) => {
+  return (
+    <form>
+      <select name="service" value={original.service} readOnly>
+        <option />
+        {selectableServices.map((service) => (
+          <option key={service}>{service}</option>
+        ))}
+      </select>
+      <TimeSlotTable
+        salonOpensAt={salonOpensAt}
+        salonClosesAt={salonClosesAt}
+        today={today}
+        availableTimeSlots={availableTimeSlots}
+        checkedTimeSlot={original.startsAt}
+      />
+    </form>
+  );
+};
 
 AppointmentForm.defaultProps = {
   salonOpensAt: 9,
