@@ -7,6 +7,7 @@ import {
   form,
   initializeReactContainer,
   render,
+  submit,
   submitButton,
 } from "./reactTestExtensions";
 import { AppointmentForm } from "../src/AppointmentForm";
@@ -45,6 +46,14 @@ describe("AppointmentForm", () => {
     render(<AppointmentForm {...testProps} />);
 
     expect(submitButton()).not.toBeNull();
+  });
+
+  it("prevents the default action when submitting the form", () => {
+    render(<AppointmentForm {...testProps} onSubmit={() => {}} />);
+
+    const event = submit(form());
+
+    expect(event.defaultPrevented).toBe(true);
   });
 
   describe("service field", () => {
