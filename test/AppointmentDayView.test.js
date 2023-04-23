@@ -9,6 +9,7 @@ import {
   textOf,
   typesOf,
 } from "./reactTestExtensions";
+import { todayAt } from "./builders/time";
 
 describe("Appointment", () => {
   const blankCustomer = {
@@ -120,21 +121,16 @@ describe("Appointment", () => {
   });
 
   it("renders the timestamp as part of the heading", () => {
-    const today = new Date();
-
-    render(
-      <Appointment startsAt={today.setHours(9, 0)} customer={blankCustomer} />
-    );
+    render(<Appointment startsAt={todayAt(9)} customer={blankCustomer} />);
 
     expect(element("h3")).toContainText("Today's appointment at 09:00");
   });
 });
 
 describe("AppointmentsDayView", () => {
-  const today = new Date();
   const twoAppointments = [
-    { startsAt: today.setHours(12, 0), customer: { firstName: "Ashley" } },
-    { startsAt: today.setHours(13, 0), customer: { firstName: "Jordan" } },
+    { startsAt: todayAt(12), customer: { firstName: "Ashley" } },
+    { startsAt: todayAt(13), customer: { firstName: "Jordan" } },
   ];
 
   const secondButton = () => elements(" button")[1];
