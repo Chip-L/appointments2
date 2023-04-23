@@ -123,6 +123,15 @@ export const AppointmentForm = ({
 }) => {
   const [appointment, setAppointment] = useState(original);
 
+  const handleServiceChange = (event) => {
+    console.log("handleServiceChange:", event.target.value);
+
+    setAppointment((appointment) => ({
+      ...appointment,
+      service: event.target.value,
+    }));
+  };
+
   const handleStartsAsChange = useCallback(
     ({ target: { value } }) =>
       setAppointment((appointment) => ({
@@ -134,13 +143,21 @@ export const AppointmentForm = ({
 
   const handleSubmit = (event) => {
     event.preventDefault();
+
+    console.log("handleSubmit:", appointment);
+
     onSubmit(appointment);
   };
 
   return (
     <form onSubmit={handleSubmit}>
       <label htmlFor="service">Services</label>
-      <select id="service" name="service" value={original.service} readOnly>
+      <select
+        id="service"
+        name="service"
+        value={appointment.service}
+        onChange={handleServiceChange}
+      >
         <option />
         {selectableServices.map((service) => (
           <option key={service}>{service}</option>

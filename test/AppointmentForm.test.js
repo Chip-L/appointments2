@@ -1,5 +1,6 @@
 import React from "react";
 import {
+  change,
   click,
   element,
   elements,
@@ -133,6 +134,42 @@ describe("AppointmentForm", () => {
 
       expect(option.selected).toBe(true);
     });
+
+    it("saves the existing value when submitted", () => {
+      expect.hasAssertions();
+
+      const selectedService = services[1];
+      const appointment = {
+        service: selectedService,
+      };
+      render(
+        <AppointmentForm
+          {...testProps}
+          original={appointment}
+          onSubmit={({ service }) => expect(service).toEqual(selectedService)}
+        />
+      );
+
+      click(submitButton());
+    });
+
+    it("saves a new value when submitted", () => {
+      expect.hasAssertions();
+
+      const appointment = {
+        service: services[0],
+      };
+      render(
+        <AppointmentForm
+          {...testProps}
+          original={appointment}
+          onSubmit={({ service }) => expect(service).toEqual(services[1])}
+        />
+      );
+
+      change(field("service"), services[1]);
+      click(submitButton());
+    });
   });
 
   describe("time slot table", () => {
@@ -241,7 +278,7 @@ describe("AppointmentForm", () => {
       click(submitButton());
     });
 
-    it("save a new value when submitted", () => {
+    it("saves a new value when submitted", () => {
       expect.hasAssertions();
 
       const appointment = {
