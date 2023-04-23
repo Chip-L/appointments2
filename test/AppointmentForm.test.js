@@ -1,5 +1,6 @@
 import React from "react";
 import {
+  click,
   element,
   elements,
   field,
@@ -45,6 +46,26 @@ describe("AppointmentForm", () => {
     );
 
     expect(submitButton()).not.toBeNull();
+  });
+
+  it("saves the existing value when submitted", () => {
+    expect.hasAssertions();
+
+    const appointment = {
+      startsAt: availableTimeSlots[1].startsAt,
+    };
+    render(
+      <AppointmentForm
+        original={appointment}
+        availableTimeSlots={availableTimeSlots}
+        today={today}
+        onSubmit={({ startsAt }) =>
+          expect(startsAt).toEqual(availableTimeSlots[1].startsAt)
+        }
+      />
+    );
+
+    click(submitButton());
   });
 
   describe("service field", () => {
