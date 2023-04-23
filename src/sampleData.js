@@ -1,103 +1,84 @@
+import { faker } from "@faker-js/faker";
+
+const randomInt = (range) =>
+  Math.floor(Math.random() * range);
+
+Array.prototype.unique = function () {
+  return this.filter(function (value, index, self) {
+    return self.indexOf(value) === index;
+  });
+};
+
+Array.prototype.pickRandom = function () {
+  return this[randomInt(this.length)];
+};
+
 const today = new Date();
 const at = (hours) => today.setHours(hours, 0);
-export const sampleAppointments = [
-  {
-    startsAt: at(9),
-    customer: {
-      firstName: "Charlie",
-      lastName: "Brown",
-      phoneNumber: "907-555-1234",
-    },
-    stylist: "Joan",
-    service: "Cut",
-    notes: "Use a #8",
-  },
-  {
-    startsAt: at(10),
-    customer: {
-      firstName: "Frankie",
-      lastName: "Avalon",
-      phoneNumber: "720-555-1234",
-    },
-    stylist: "Joan",
-    service: "Cut",
-    notes: "Use a #2",
-  },
-  {
-    startsAt: at(11),
-    customer: {
-      firstName: "Casey",
-      lastName: "Jones",
-      phoneNumber: "303-555-1234",
-    },
-    stylist: "Joan",
-    service: "Cut",
-    notes: "Use a #5",
-  },
-  {
-    startsAt: at(12),
-    customer: {
-      firstName: "Ashley",
-      lastName: "Benson",
-      phoneNumber: "406-555-1234",
-    },
-    stylist: "Joan",
-    service: "Style",
-    notes: "",
-  },
-  {
-    startsAt: at(13),
-    customer: {
-      firstName: "Jordan",
-      lastName: "Sparks",
-      phoneNumber: "907-555-9874",
-    },
-    stylist: "Joan",
-    service: "Dye",
-    notes: "Black",
-  },
-  {
-    startsAt: at(14),
-    customer: {
-      firstName: "Jay",
-      lastName: "Bird",
-      phoneNumber: "406-555-9874",
-    },
-    stylist: "Joan",
-    service: "Cut",
-    notes: "Use a #1",
-  },
-  {
-    startsAt: at(15),
-    customer: {
-      firstName: "Alex",
-      lastName: "Dominguez",
-      phoneNumber: "303-555-9874",
-    },
-    stylist: "Joan",
-    service: "Cut",
-    notes: "lorem ipsum",
-  },
-  {
-    startsAt: at(16),
-    customer: {
-      firstName: "Jules",
-      lastName: "Verne",
-      phoneNumber: "720-555-9874",
-    },
-    stylist: "Joan",
-    service: "Dye",
-    notes: "Used blue last time",
-  },
-  {
-    startsAt: at(17),
-    customer: {
-      firstName: "Stevie",
-      lastName: "Wonder",
-      phoneNumber: "907-555-0000",
-    },
-    stylist: "Joan",
-    service: "Shave",
-    notes: "real close",
-  },
+
+const stylists = ["Ashley", "Jo", "Pat", "Sam"];
+
+const services = [
+  "Cut",
+  "Blow-dry",
+  "Cut & color",
+  "Beard trim",
+  "Cut & beard trim",
+  "Extensions",
 ];
+
+const generateFakeCustomer = () => ({
+  firstName: faker.name.firstName(),
+  lastName: faker.name.lastName(),
+  phoneNumber: faker.phone.number("(###) ###-####"),
+});
+
+const generateFakeAppointment = () => ({
+  customer: generateFakeCustomer(),
+  stylist: stylists.pickRandom(),
+  service: services.pickRandom(),
+  notes: faker.lorem.paragraph(),
+});
+
+export const sampleAppointments = [
+  { startsAt: at(9), ...generateFakeAppointment() },
+  { startsAt: at(10), ...generateFakeAppointment() },
+  { startsAt: at(11), ...generateFakeAppointment() },
+  { startsAt: at(12), ...generateFakeAppointment() },
+  { startsAt: at(13), ...generateFakeAppointment() },
+  { startsAt: at(14), ...generateFakeAppointment() },
+  { startsAt: at(15), ...generateFakeAppointment() },
+  { startsAt: at(16), ...generateFakeAppointment() },
+  { startsAt: at(17), ...generateFakeAppointment() },
+];
+
+const pickMany = (items, number) =>
+  Array(number)
+    .fill(1)
+    .map(() => items.pickRandom());
+
+const buildTimeSlots = () => {
+  const today = new Date();
+  const startTime = today.setHours(9, 0, 0, 0);
+  const times = [...Array(7).keys()].map((day) => {
+    const daysToAdd = day * 24 * 60 * 60 * 1000;
+    return [...Array(20).keys()].map((halfHour) => {
+      const halfHoursToAdd =
+        halfHour * 30 * 60 * 1000;
+      return {
+        startsAt:
+          startTime + daysToAdd + halfHoursToAdd,
+        stylists: pickMany(
+          stylists,
+          randomInt(stylists.length)
+        ),
+      };
+    });
+  });
+  return [].concat(...times);
+};
+
+export const sampleAvailableTimeSlots = pickMany(
+  buildTimeSlots(),
+  50
+);
