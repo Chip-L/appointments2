@@ -87,6 +87,13 @@ describe("AppointmentForm", () => {
     });
   };
 
+  const itAssignsAnIdThatMatchesTheLabelId = (fieldName) =>
+    it("assigns an id that matches the label id", () => {
+      render(<AppointmentForm {...testProps} />);
+
+      expect(field(fieldName).id).toEqual(fieldName);
+    });
+
   describe("service field", () => {
     const labelsOfAllOptions = (element) =>
       Array.from(element.childNodes, (node) => node.textContent);
@@ -98,6 +105,7 @@ describe("AppointmentForm", () => {
 
     itRendersAsASelectBox("service");
     itRendersALabel("service", "Services");
+    itAssignsAnIdThatMatchesTheLabelId("service");
 
     it("lists all salon services", () => {
       render(<AppointmentForm {...testProps} selectableServices={services} />);
