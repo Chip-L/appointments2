@@ -129,6 +129,12 @@ export const AppointmentForm = ({
     ? serviceStylists[appointment.service]
     : selectableStylists;
 
+  const timeSlotsForStylist = appointment.stylist
+    ? availableTimeSlots.filter((slot) =>
+        slot.stylists.includes(appointment.stylist)
+      )
+    : availableTimeSlots;
+
   const handleSelectChange = (event) => {
     setAppointment((appointment) => ({
       ...appointment,
@@ -183,7 +189,7 @@ export const AppointmentForm = ({
         salonOpensAt={salonOpensAt}
         salonClosesAt={salonClosesAt}
         today={today}
-        availableTimeSlots={availableTimeSlots}
+        availableTimeSlots={timeSlotsForStylist}
         checkedTimeSlot={appointment.startsAt}
         handleChange={handleStartsAsChange}
       />

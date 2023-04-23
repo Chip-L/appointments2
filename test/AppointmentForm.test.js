@@ -349,5 +349,29 @@ describe("AppointmentForm", () => {
       click(startsAtField(1));
       click(submitButton());
     });
+
+    it("filters appointments by selected stylist", () => {
+      const availableTimeSlots = [
+        {
+          startsAt: todayAt(9),
+          stylists: ["Ashley"],
+        },
+        {
+          startsAt: todayAt(9, 30),
+          stylists: ["Jo"],
+        },
+      ];
+
+      render(
+        <AppointmentForm
+          {...testProps}
+          availableTimeSlots={availableTimeSlots}
+        />
+      );
+
+      change(field("stylist"), "Jo");
+
+      expect(cellsWithRadioButtons()).toEqual([7]);
+    });
   });
 });
