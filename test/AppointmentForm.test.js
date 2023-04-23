@@ -197,5 +197,22 @@ describe("AppointmentForm", () => {
 
       expect(elements("input[type=radio]")).toHaveLength(0);
     });
+
+    it("sets rdaio buton values to the startsAt value of the corresponding appointment", () => {
+      render(
+        <AppointmentForm
+          original={blankAppointment}
+          availableTimeSlots={availableTimeSlots}
+          today={today}
+        />
+      );
+
+      const allRadioValues = elements("input[type=radio]").map(({ value }) =>
+        parseInt(value)
+      );
+      const allSlotTimes = availableTimeSlots.map(({ startsAt }) => startsAt);
+
+      expect(allRadioValues).toEqual(allSlotTimes);
+    });
   });
 });
