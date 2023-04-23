@@ -29,7 +29,23 @@ const toShortDate = (timestamp) => {
   return `${day} ${dayOfMonth}`;
 };
 
-const TimeSlotTable = ({ salonOpensAt, salonClosesAt, today }) => {
+const mergeDateAndTime = (date, timeSlot) => {
+  const time = new Date(timeSlot);
+
+  return new Date(date).setHours(
+    time.getHours(),
+    time.getMinutes(),
+    time.getSeconds(),
+    time.getMilliseconds()
+  );
+};
+
+const TimeSlotTable = ({
+  salonOpensAt,
+  salonClosesAt,
+  today,
+  availableTimeSlots,
+}) => {
   const timeSlots = dailyTimeSlots(salonOpensAt, salonClosesAt);
   const dates = weeklyDateValues(today);
 
@@ -47,6 +63,17 @@ const TimeSlotTable = ({ salonOpensAt, salonClosesAt, today }) => {
         {timeSlots.map((timeSlot) => (
           <tr key={timeSlot}>
             <th>{toTimeValue(timeSlot)}</th>
+            {dates.map((date) => (
+              <td key={date}>
+                {availableTimeSlots.some(
+                  (availableTimeSlot) =>
+                    availableTimeSlot.startsAt ===
+                    mergeDateAndTime(date, timeSlot)
+                ) ? (
+                  <input type="radio" />
+                ) : null}
+              </td>
+            ))}
           </tr>
         ))}
       </tbody>
@@ -60,6 +87,7 @@ export const AppointmentForm = ({
   salonOpensAt,
   salonClosesAt,
   today,
+  availableTimeSlots,
 }) => (
   <form>
     <select name="service" value={original.service} readOnly>
@@ -72,6 +100,7 @@ export const AppointmentForm = ({
       salonOpensAt={salonOpensAt}
       salonClosesAt={salonClosesAt}
       today={today}
+      availableTimeSlots={availableTimeSlots}
     />
   </form>
 );
