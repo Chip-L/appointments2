@@ -114,6 +114,8 @@ const TimeSlotTable = ({
 
 export const AppointmentForm = ({
   selectableServices,
+  selectableStylists,
+  serviceStylists,
   original,
   salonOpensAt,
   salonClosesAt,
@@ -123,12 +125,14 @@ export const AppointmentForm = ({
 }) => {
   const [appointment, setAppointment] = useState(original);
 
-  const handleServiceChange = (event) => {
-    console.log("handleServiceChange:", event.target.value);
+  const stylistForService = appointment.service
+    ? serviceStylists[appointment.service]
+    : selectableStylists;
 
+  const handleSelectChange = (event) => {
     setAppointment((appointment) => ({
       ...appointment,
-      service: event.target.value,
+      [event.target.name]: event.target.value,
     }));
   };
 
@@ -144,8 +148,6 @@ export const AppointmentForm = ({
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    console.log("handleSubmit:", appointment);
-
     onSubmit(appointment);
   };
 
@@ -156,11 +158,24 @@ export const AppointmentForm = ({
         id="service"
         name="service"
         value={appointment.service}
-        onChange={handleServiceChange}
+        onChange={handleSelectChange}
       >
         <option />
         {selectableServices.map((service) => (
           <option key={service}>{service}</option>
+        ))}
+      </select>
+
+      <label htmlFor="stylist">Stylist</label>
+      <select
+        id="stylist"
+        name="stylist"
+        value={appointment.stylist}
+        onChange={handleSelectChange}
+      >
+        <option />
+        {stylistForService.map((stylist) => (
+          <option key={stylist}>{stylist}</option>
         ))}
       </select>
 
@@ -179,6 +194,7 @@ export const AppointmentForm = ({
 };
 
 AppointmentForm.defaultProps = {
+  today: new Date(),
   salonOpensAt: 9,
   salonClosesAt: 19,
   selectableServices: [
@@ -189,5 +205,13 @@ AppointmentForm.defaultProps = {
     "Cut & beard trim",
     "Extensions",
   ],
-  today: new Date(),
+  selectableStylists: ["Ashley", "Jo", "Pat", "Sam"],
+  serviceStylists: {
+    Cut: ["Ashley", "Jo", "Pat", "Sam"],
+    "Blow-dry": ["Ashley", "Jo", "Pat", "Sam"],
+    "Cut & color": ["Ashley", "Jo"],
+    "Beard trim": ["Pat", "Sam"],
+    "Cut & beard trim": ["Pat", "Sam"],
+    Extensions: ["Ashley", "Pat"],
+  },
 };
