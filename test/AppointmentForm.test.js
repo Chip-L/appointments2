@@ -6,6 +6,7 @@ import {
   field,
   form,
   initializeReactContainer,
+  labelFor,
   render,
   submit,
   submitButton,
@@ -56,6 +57,36 @@ describe("AppointmentForm", () => {
     expect(event.defaultPrevented).toBe(true);
   });
 
+  const itRendersAsASelectBox = (fieldName) => {
+    it("renders as a select box", () => {
+      render(<AppointmentForm {...testProps} />);
+
+      expect(field(fieldName)).not.toBeNull();
+      expect(field(fieldName)).toBeElementWithTag("SELECT");
+    });
+
+    it("has a blank value as the first value", () => {
+      render(<AppointmentForm {...testProps} original={blankAppointment} />);
+
+      const firstOption = field(fieldName).childNodes[0];
+      expect(firstOption.value).toEqual("");
+    });
+  };
+
+  const itRendersALabel = (fieldName, text) => {
+    it("renders a label for the select", () => {
+      render(<AppointmentForm {...testProps} />);
+
+      expect(labelFor(fieldName)).not.toBeNull();
+    });
+
+    it(`renders '${text}' as the label`, () => {
+      render(<AppointmentForm {...testProps} />);
+
+      expect(labelFor(fieldName)).toContainText(text);
+    });
+  };
+
   describe("service field", () => {
     const labelsOfAllOptions = (element) =>
       Array.from(element.childNodes, (node) => node.textContent);
@@ -65,19 +96,8 @@ describe("AppointmentForm", () => {
       return options.find((option) => option.textContent === textContent);
     };
 
-    it("renders as a select box", () => {
-      render(<AppointmentForm {...testProps} />);
-
-      expect(field("service")).not.toBeNull();
-      expect(field("service")).toBeElementWithTag("SELECT");
-    });
-
-    it("has a blank value as the first value", () => {
-      render(<AppointmentForm {...testProps} original={blankAppointment} />);
-
-      const firstOption = field("service").childNodes[0];
-      expect(firstOption.value).toEqual("");
-    });
+    itRendersAsASelectBox("service");
+    itRendersALabel("service", "Services");
 
     it("lists all salon services", () => {
       render(<AppointmentForm {...testProps} selectableServices={services} />);
