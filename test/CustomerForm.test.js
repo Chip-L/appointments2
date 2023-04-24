@@ -12,6 +12,9 @@ import {
 } from "./reactTestExtensions";
 import { CustomerForm } from "../src/CustomerForm";
 
+const originalFetch = global.fetch;
+let fetchSpy;
+
 const spy = () => {
   let receivedArguments;
   return {
@@ -21,10 +24,10 @@ const spy = () => {
   };
 };
 
-describe("CustomerForm", () => {
-  const originalFetch = global.fetch;
-  let fetchSpy;
+const bodyOfLastFetchRequest = () =>
+  JSON.parse(fetchSpy.receivedArgument(1).body);
 
+describe("CustomerForm", () => {
   const blankCustomer = {
     firstName: "",
     lastName: "",
@@ -39,26 +42,6 @@ describe("CustomerForm", () => {
 
   afterEach(() => {
     global.fetch = originalFetch;
-  });
-
-  it("renders a form", () => {
-    render(<CustomerForm original={blankCustomer} />);
-
-    expect(form()).not.toBeNull();
-  });
-
-  it("renders a submit button", () => {
-    render(<CustomerForm original={blankCustomer} />);
-
-    expect(submitButton()).not.toBeNull();
-  });
-
-  it("prevents the default action when submitting the form", () => {
-    render(<CustomerForm original={blankCustomer} />);
-
-    const event = submit(form());
-
-    expect(event.defaultPrevented).toBe(true);
   });
 
   const itRendersAsATextBox = (fieldName) =>
@@ -106,12 +89,7 @@ describe("CustomerForm", () => {
 
       click(submitButton());
 
-      expect(fetchSpy).toBeCalledWith(
-        expect.anything(),
-        expect.objectContaining({
-          body: JSON.stringify(customer),
-        })
-      );
+      expect(bodyOfLastFetchRequest()).toMatchObject(customer);
     });
 
   const itSubmitsNewValue = (fieldName, value) =>
@@ -121,16 +99,31 @@ describe("CustomerForm", () => {
       change(field(fieldName), value);
       click(submitButton());
 
-      expect(fetchSpy).toBeCalledWith(
-        expect.anything(),
-        expect.objectContaining({
-          body: JSON.stringify({
-            ...blankCustomer,
-            [fieldName]: value,
-          }),
-        })
-      );
+      expect(bodyOfLastFetchRequest()).toMatchObject({
+        ...blankCustomer,
+        [fieldName]: value,
+      });
     });
+
+  it("renders a form", () => {
+    render(<CustomerForm original={blankCustomer} />);
+
+    expect(form()).not.toBeNull();
+  });
+
+  it("renders a submit button", () => {
+    render(<CustomerForm original={blankCustomer} />);
+
+    expect(submitButton()).not.toBeNull();
+  });
+
+  it("prevents the default action when submitting the form", () => {
+    render(<CustomerForm original={blankCustomer} />);
+
+    const event = submit(form());
+
+    expect(event.defaultPrevented).toBe(true);
+  });
 
   describe("first name field", () => {
     itRendersAsATextBox("firstName");
