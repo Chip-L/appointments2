@@ -2,6 +2,7 @@ import React from "react";
 import {
   change,
   clickAndWait,
+  element,
   field,
   form,
   initializeReactContainer,
@@ -20,6 +21,11 @@ const fetchResponseOk = (body) =>
   Promise.resolve({
     ok: true,
     json: () => Promise.resolve(body),
+  });
+
+const fetchResponseError = (body) =>
+  Promise.resolve({
+    ok: false,
   });
 
 const spy = () => {
@@ -172,43 +178,77 @@ describe("CustomerForm", () => {
     itSubmitsNewValue("phoneNumber", "720-555-9797");
   });
 
-  describe("general submit actions", () => {
-    it("sends request to POST /customers when submitting the form", async () => {
-      render(<CustomerForm {...testProps} />);
+  it("sends request to POST /customers when submitting the form", async () => {
+    render(<CustomerForm {...testProps} />);
 
-      await clickAndWait(submitButton());
+    await clickAndWait(submitButton());
 
-      expect(fetchSpy).toBeCalledWith(
-        "/customers",
-        expect.objectContaining({ method: "POST" })
-      );
+    expect(fetchSpy).toBeCalledWith(
+      "/customers",
+      expect.objectContaining({ method: "POST" })
+    );
+  });
+
+  it("calls fetch with the right configuration", async () => {
+    render(<CustomerForm {...testProps} />);
+
+    await clickAndWait(submitButton());
+
+    expect(fetchSpy).toBeCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        credentials: "same-origin",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+    );
+  });
+
+  it("notifies onSave when form is submitted", async () => {
+    const customer = { id: 123 };
+    fetchSpy.stubReturnValue(fetchResponseOk(customer));
+    const saveSpy = spy();
+
+    render(<CustomerForm original={customer} onSave={saveSpy.fn} />);
+    await clickAndWait(submitButton());
+
+    expect(saveSpy).toBeCalledWith(customer);
+  });
+
+  it("renders an alert space", async () => {
+    render(<CustomerForm {...testProps} />);
+
+    expect(element("[role=alert]")).not.toBeNull();
+  });
+
+  it("initially has no text in the alert space", () => {
+    render(<CustomerForm {...testProps} />);
+
+    expect(element("[role=alert]")).not.toContainText("error occurred");
+  });
+
+  describe("when Post request fails", () => {
+    beforeEach(() => {
+      fetchSpy.stubReturnValue(fetchResponseError());
     });
 
-    it("calls fetch with the right configuration", async () => {
-      render(<CustomerForm {...testProps} />);
-
-      await clickAndWait(submitButton());
-
-      expect(fetchSpy).toBeCalledWith(
-        expect.anything(),
-        expect.objectContaining({
-          credentials: "same-origin",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        })
-      );
-    });
-
-    it("notifies onSave when form is submitted", async () => {
-      const customer = { id: 123 };
-      fetchSpy.stubReturnValue(fetchResponseOk(customer));
+    it("does not notify onSave", async () => {
       const saveSpy = spy();
 
-      render(<CustomerForm original={customer} onSave={saveSpy.fn} />);
+      render(<CustomerForm {...testProps} onSave={saveSpy.fn} />);
       await clickAndWait(submitButton());
 
-      expect(saveSpy).toBeCalledWith(customer);
+      expect(saveSpy).not.toBeCalledWith();
+    });
+
+    it("renders error message", async () => {
+      render(<CustomerForm {...testProps} />);
+      await clickAndWait(submitButton());
+
+      expect(element("[role=alert]")).toContainText("error occurred");
     });
   });
 });
+
+// Start at Migrating to Jest’s built-in test double support (pg 201)

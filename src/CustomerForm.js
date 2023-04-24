@@ -1,7 +1,12 @@
 import React, { useState } from "react";
 
+const Error = ({ hasError }) => (
+  <p role="alert">{hasError ? "An error occurred during save." : ""}</p>
+);
+
 export const CustomerForm = ({ original, onSave }) => {
   const [customer, setCustomer] = useState(original);
+  const [error, setError] = useState(false);
 
   const handleChange = ({ target }) => {
     setCustomer((customer) => ({
@@ -22,12 +27,18 @@ export const CustomerForm = ({ original, onSave }) => {
       body: JSON.stringify(customer),
     });
 
-    const customerWithId = await result.json();
-    onSave(customerWithId);
+    if (result.ok) {
+      const customerWithId = await result.json();
+      onSave(customerWithId);
+    } else {
+      setError(true);
+    }
   };
 
   return (
     <form onSubmit={handleSubmit}>
+      <Error hasError={error} />
+
       <label htmlFor="firstName">First Name</label>
       <input
         id="firstName"
@@ -36,7 +47,6 @@ export const CustomerForm = ({ original, onSave }) => {
         value={customer.firstName}
         onChange={handleChange}
       />
-
       <label htmlFor="lastName">Last Name</label>
       <input
         id="lastName"
@@ -45,7 +55,6 @@ export const CustomerForm = ({ original, onSave }) => {
         value={customer.lastName}
         onChange={handleChange}
       />
-
       <label htmlFor="phoneNumber">Phone Number</label>
       <input
         id="phoneNumber"
@@ -54,7 +63,6 @@ export const CustomerForm = ({ original, onSave }) => {
         value={customer.phoneNumber}
         onChange={handleChange}
       />
-
       <input type="submit" value="add" />
     </form>
   );
