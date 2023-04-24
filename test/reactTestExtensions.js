@@ -13,6 +13,8 @@ export const render = (component) =>
 
 export const click = (element) => act(() => element.click());
 
+export const clickAndWait = async (element) => act(async () => click(element));
+
 export const submit = (formElement) => {
   const event = new Event("submit", {
     bubbles: true,
