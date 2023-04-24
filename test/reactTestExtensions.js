@@ -25,6 +25,9 @@ export const submit = (formElement) => {
   return event;
 };
 
+export const submitAndWait = async (formElement) =>
+  act(async () => submit(formElement));
+
 const originalValueProperty = (reactElement) => {
   const prototype = Object.getPrototypeOf(reactElement);
 

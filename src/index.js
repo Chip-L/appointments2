@@ -7,14 +7,14 @@ import { AppointmentForm } from "./AppointmentForm";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <AppointmentForm
+    {/* <AppointmentForm
       original={sampleAppointments[0]}
       availableTimeSlots={sampleAvailableTimeSlots}
-    />
-    {/* <CustomerForm
-      original={sampleAppointments[0].customer}
-      onSubmit={(customer) => console.log({ customer })}
     /> */}
+    <CustomerForm
+      original={sampleAppointments[0].customer}
+      onSave={(customer) => console.log({ customer })}
+    />
     {/* <AppointmentsDayView appointments={sampleAppointments} /> */}
   </React.StrictMode>
 );
