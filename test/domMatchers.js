@@ -20,7 +20,7 @@ expect.extend({
     }
 
     const notMatch = !this.equals(
-      received.receivedArguments,
+      received.receivedArguments(),
       expectedArguments
     );
 
