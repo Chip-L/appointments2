@@ -8,43 +8,12 @@ import {
   initializeReactContainer,
   labelFor,
   render,
-  submit,
   submitAndWait,
   submitButton,
 } from "./reactTestExtensions";
+import { bodyOfLastFetchRequest } from "./spyHelpers";
+import { fetchResponseOk, fetchResponseError } from "./builders/fetch";
 import { CustomerForm } from "../src/CustomerForm";
-
-const originalFetch = global.fetch;
-let fetchSpy;
-
-const fetchResponseOk = (body) =>
-  Promise.resolve({
-    ok: true,
-    json: () => Promise.resolve(body),
-  });
-
-const fetchResponseError = (body) =>
-  Promise.resolve({
-    ok: false,
-  });
-
-const spy = () => {
-  let receivedArguments;
-  let returnValue;
-
-  return {
-    fn: (...args) => {
-      receivedArguments = args;
-      return returnValue;
-    },
-    receivedArguments: () => receivedArguments,
-    receivedArgument: (n) => receivedArguments[n],
-    stubReturnValue: (value) => (returnValue = value),
-  };
-};
-
-const bodyOfLastFetchRequest = () =>
-  JSON.parse(fetchSpy.receivedArgument(1).body);
 
 describe("CustomerForm", () => {
   const blankCustomer = {
@@ -60,14 +29,7 @@ describe("CustomerForm", () => {
 
   beforeEach(() => {
     initializeReactContainer();
-    fetchSpy = spy();
-    global.fetch = fetchSpy.fn;
-
-    fetchSpy.stubReturnValue(fetchResponseOk({}));
-  });
-
-  afterEach(() => {
-    global.fetch = originalFetch;
+    jest.spyOn(global, "fetch").mockResolvedValue(fetchResponseOk({}));
   });
 
   const itRendersAsATextBox = (fieldName) =>
@@ -183,7 +145,7 @@ describe("CustomerForm", () => {
 
     await clickAndWait(submitButton());
 
-    expect(fetchSpy).toBeCalledWith(
+    expect(global.fetch).toBeCalledWith(
       "/customers",
       expect.objectContaining({ method: "POST" })
     );
@@ -194,7 +156,7 @@ describe("CustomerForm", () => {
 
     await clickAndWait(submitButton());
 
-    expect(fetchSpy).toBeCalledWith(
+    expect(global.fetch).toBeCalledWith(
       expect.anything(),
       expect.objectContaining({
         credentials: "same-origin",
@@ -207,10 +169,10 @@ describe("CustomerForm", () => {
 
   it("notifies onSave when form is submitted", async () => {
     const customer = { id: 123 };
-    fetchSpy.stubReturnValue(fetchResponseOk(customer));
-    const saveSpy = spy();
+    global.fetch.mockResolvedValue(fetchResponseOk(customer));
+    const saveSpy = jest.fn();
 
-    render(<CustomerForm original={customer} onSave={saveSpy.fn} />);
+    render(<CustomerForm original={customer} onSave={saveSpy} />);
     await clickAndWait(submitButton());
 
     expect(saveSpy).toBeCalledWith(customer);
@@ -230,16 +192,16 @@ describe("CustomerForm", () => {
 
   describe("when Post request fails", () => {
     beforeEach(() => {
-      fetchSpy.stubReturnValue(fetchResponseError());
+      global.fetch.mockResolvedValue(fetchResponseError());
     });
 
     it("does not notify onSave", async () => {
-      const saveSpy = spy();
+      const saveSpy = jest.fn();
 
-      render(<CustomerForm {...testProps} onSave={saveSpy.fn} />);
+      render(<CustomerForm {...testProps} onSave={saveSpy} />);
       await clickAndWait(submitButton());
 
-      expect(saveSpy).not.toBeCalledWith();
+      expect(saveSpy).not.toBeCalled();
     });
 
     it("renders error message", async () => {
@@ -250,5 +212,3 @@ describe("CustomerForm", () => {
     });
   });
 });
-
-// Start at Migrating to Jest’s built-in test double support (pg 201)
