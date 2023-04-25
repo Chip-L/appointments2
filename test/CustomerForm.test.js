@@ -210,5 +210,17 @@ describe("CustomerForm", () => {
 
       expect(element("[role=alert]")).toContainText("error occurred");
     });
+
+    it("clears the error state when resubmit is successful", async () => {
+      const customer = { id: 123 };
+
+      render(<CustomerForm {...testProps} />);
+      await clickAndWait(submitButton());
+
+      global.fetch.mockResolvedValue(fetchResponseOk(customer));
+      await clickAndWait(submitButton());
+
+      expect(element("[role=alert]")).not.toContainText("error occurred");
+    });
   });
 });
