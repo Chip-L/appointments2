@@ -2,6 +2,7 @@ import React from "react";
 import {
   change,
   click,
+  clickAndWait,
   element,
   elements,
   field,
@@ -14,6 +15,7 @@ import {
 } from "./reactTestExtensions";
 import { AppointmentForm } from "../src/AppointmentForm";
 import { today, todayAt, tomorrowAt } from "./builders/time";
+import { fetchResponseOk } from "./builders/fetch";
 
 describe("AppointmentForm", () => {
   const blankAppointment = {
@@ -53,26 +55,7 @@ describe("AppointmentForm", () => {
 
   beforeEach(() => {
     initializeReactContainer();
-  });
-
-  it("renders a form", () => {
-    render(<AppointmentForm {...testProps} />);
-
-    expect(form()).not.toBeNull();
-  });
-
-  it("renders a submit button", () => {
-    render(<AppointmentForm {...testProps} />);
-
-    expect(submitButton()).not.toBeNull();
-  });
-
-  it("prevents the default action when submitting the form", () => {
-    render(<AppointmentForm {...testProps} onSubmit={() => {}} />);
-
-    const event = submit(form());
-
-    expect(event.defaultPrevented).toBe(true);
+    jest.spyOn(global, "fetch").mockResolvedValue(fetchResponseOk);
   });
 
   const itRendersAsASelectBox = (fieldName) =>
@@ -125,8 +108,9 @@ describe("AppointmentForm", () => {
     });
 
   const itSubmitsExistingValue = (fieldName, value) =>
-    it("saves the existing value when submitted", () => {
-      expect.hasAssertions();
+    it("saves the existing value when submitted", async () => {
+      const submitSpy = jest.fn();
+      let submitArg;
 
       const appointment = {
         [fieldName]: value,
@@ -135,13 +119,15 @@ describe("AppointmentForm", () => {
         <AppointmentForm
           {...testProps}
           original={appointment}
-          onSubmit={(appointment) =>
-            expect(appointment[fieldName]).toEqual(value)
+          onSubmit={(submittedAppointment) =>
+            (submitArg = submittedAppointment)
           }
         />
       );
 
-      click(submitButton());
+      await clickAndWait(submitButton());
+
+      expect(submitArg).toEqual(appointment);
     });
 
   const itSubmitsNewValue = (fieldName, newValue) =>
@@ -160,6 +146,26 @@ describe("AppointmentForm", () => {
       change(field(fieldName), newValue);
       click(submitButton());
     });
+
+  it("renders a form", () => {
+    render(<AppointmentForm {...testProps} />);
+
+    expect(form()).not.toBeNull();
+  });
+
+  it("renders a submit button", () => {
+    render(<AppointmentForm {...testProps} />);
+
+    expect(submitButton()).not.toBeNull();
+  });
+
+  it("prevents the default action when submitting the form", () => {
+    render(<AppointmentForm {...testProps} onSubmit={() => {}} />);
+
+    const event = submit(form());
+
+    expect(event.defaultPrevented).toBe(true);
+  });
 
   describe("service field", () => {
     itRendersAsASelectBox("service");
@@ -373,5 +379,16 @@ describe("AppointmentForm", () => {
 
       expect(cellsWithRadioButtons()).toEqual([7]);
     });
+  });
+
+  it("sends request to POST /customers when submitting the form", async () => {
+    render(<AppointmentForm {...testProps} onSubmit={() => {}} />);
+
+    await clickAndWait(submitButton());
+
+    expect(global.fetch).toBeCalledWith(
+      "/appointments",
+      expect.objectContaining({ method: "POST" })
+    );
   });
 });

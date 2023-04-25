@@ -151,8 +151,12 @@ export const AppointmentForm = ({
     []
   );
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
+
+    const result = await global.fetch("/appointments", {
+      method: "POST",
+    });
 
     onSubmit(appointment);
   };
