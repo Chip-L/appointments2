@@ -110,7 +110,6 @@ describe("AppointmentForm", () => {
   const itSubmitsExistingValue = (fieldName, value) =>
     it("saves the existing value when submitted", async () => {
       const submitSpy = jest.fn();
-      let submitArg;
 
       const appointment = {
         [fieldName]: value,
@@ -119,32 +118,37 @@ describe("AppointmentForm", () => {
         <AppointmentForm
           {...testProps}
           original={appointment}
-          onSubmit={(submittedAppointment) =>
-            (submitArg = submittedAppointment)
-          }
+          onSubmit={submitSpy}
         />
       );
 
       await clickAndWait(submitButton());
 
-      expect(submitArg).toEqual(appointment);
+      expect(submitSpy).toBeCalledWith(appointment);
     });
 
   const itSubmitsNewValue = (fieldName, newValue) =>
-    it("saves a new value when submitted", () => {
-      expect.hasAssertions();
+    it("saves a new value when submitted", async () => {
+      const submitSpy = jest.fn();
 
       render(
         <AppointmentForm
           {...testProps}
-          onSubmit={(appointment) =>
-            expect(appointment[fieldName]).toEqual(newValue)
+          onSubmit={
+            submitSpy
+            // (appointment) =>
+            // expect(appointment[fieldName]).toEqual(newValue)
           }
         />
       );
 
       change(field(fieldName), newValue);
-      click(submitButton());
+      await clickAndWait(submitButton());
+
+      expect(submitSpy).toBeCalledWith({
+        ...blankAppointment,
+        [fieldName]: newValue,
+      });
     });
 
   it("renders a form", () => {
