@@ -15,7 +15,10 @@ import {
 } from "./reactTestExtensions";
 import { AppointmentForm } from "../src/AppointmentForm";
 import { today, todayAt, tomorrowAt } from "./builders/time";
-import { fetchResponseOk } from "./builders/fetch";
+import { fetchResponseError, fetchResponseOk } from "./builders/fetch";
+import { bodyOfLastFetchRequest } from "./spyHelpers";
+
+const saveSpy = jest.fn();
 
 describe("AppointmentForm", () => {
   const blankAppointment = {
@@ -37,6 +40,8 @@ describe("AppointmentForm", () => {
   const services = ["Cut", "Blow-dry"];
   const stylists = ["Ashley", "Jo"];
 
+  const startsAtField = (index) => elements("input[name=startsAt]")[index];
+
   const testProps = {
     today,
     selectableServices: services,
@@ -55,7 +60,7 @@ describe("AppointmentForm", () => {
 
   beforeEach(() => {
     initializeReactContainer();
-    jest.spyOn(global, "fetch").mockResolvedValue(fetchResponseOk);
+    jest.spyOn(global, "fetch").mockResolvedValue(fetchResponseOk());
   });
 
   const itRendersAsASelectBox = (fieldName) =>
@@ -109,8 +114,6 @@ describe("AppointmentForm", () => {
 
   const itSubmitsExistingValue = (fieldName, value) =>
     it("saves the existing value when submitted", async () => {
-      const submitSpy = jest.fn();
-
       const appointment = {
         [fieldName]: value,
       };
@@ -118,34 +121,38 @@ describe("AppointmentForm", () => {
         <AppointmentForm
           {...testProps}
           original={appointment}
-          onSubmit={submitSpy}
+          onSave={saveSpy}
         />
       );
 
       await clickAndWait(submitButton());
 
-      expect(submitSpy).toBeCalledWith(appointment);
+      expect(bodyOfLastFetchRequest()).toMatchObject(appointment);
     });
 
-  const itSubmitsNewValue = (fieldName, newValue) =>
-    it("saves a new value when submitted", async () => {
+  const itSelectsAndSubmitsNewValue = (fieldName, newValue) =>
+    it("saves a new value when submitted (select)", async () => {
       const submitSpy = jest.fn();
 
-      render(
-        <AppointmentForm
-          {...testProps}
-          onSubmit={
-            submitSpy
-            // (appointment) =>
-            // expect(appointment[fieldName]).toEqual(newValue)
-          }
-        />
-      );
+      render(<AppointmentForm {...testProps} onSave={submitSpy} />);
 
       change(field(fieldName), newValue);
       await clickAndWait(submitButton());
 
-      expect(submitSpy).toBeCalledWith({
+      expect(bodyOfLastFetchRequest()).toMatchObject({
+        ...blankAppointment,
+        [fieldName]: newValue,
+      });
+    });
+
+  const itChecksAndSubmitsNewValue = (fieldName, newValue, checkboxIndex) =>
+    it("saves a new value when submitted (checkbox)", async () => {
+      render(<AppointmentForm {...testProps} onSave={saveSpy} />);
+
+      click(startsAtField(checkboxIndex));
+      await clickAndWait(submitButton());
+
+      expect(bodyOfLastFetchRequest()).toMatchObject({
         ...blankAppointment,
         [fieldName]: newValue,
       });
@@ -164,7 +171,7 @@ describe("AppointmentForm", () => {
   });
 
   it("prevents the default action when submitting the form", () => {
-    render(<AppointmentForm {...testProps} onSubmit={() => {}} />);
+    render(<AppointmentForm {...testProps} onSave={() => {}} />);
 
     const event = submit(form());
 
@@ -187,7 +194,7 @@ describe("AppointmentForm", () => {
     itRendersALabel("service", "Services");
     itAssignsAnIdThatMatchesTheLabelId("service");
     itSubmitsExistingValue("service", services[1]);
-    itSubmitsNewValue("service", services[1]);
+    itSelectsAndSubmitsNewValue("service", services[1]);
   });
 
   describe("stylists field", () => {
@@ -231,12 +238,10 @@ describe("AppointmentForm", () => {
     itRendersALabel("stylist", "Stylist");
     itAssignsAnIdThatMatchesTheLabelId("stylist");
     itSubmitsExistingValue("stylist", "Jo");
-    itSubmitsNewValue("stylist", "Jo");
+    itSelectsAndSubmitsNewValue("stylist", "Jo");
   });
 
   describe("time slot table", () => {
-    const startsAtField = (index) => elements("input[name=startsAt]")[index];
-
     it("renders a table for time slots with an id", () => {
       render(<AppointmentForm {...testProps} />);
 
@@ -321,44 +326,9 @@ describe("AppointmentForm", () => {
       expect(startsAtField(1).checked).toBe(true);
     });
 
-    it("saves the existing value when submitted", () => {
-      expect.hasAssertions();
+    itSubmitsExistingValue("startsAt", availableTimeSlots[1].startsAt);
 
-      const appointment = {
-        startsAt: availableTimeSlots[1].startsAt,
-      };
-      render(
-        <AppointmentForm
-          {...testProps}
-          original={appointment}
-          onSubmit={({ startsAt }) =>
-            expect(startsAt).toEqual(availableTimeSlots[1].startsAt)
-          }
-        />
-      );
-
-      click(submitButton());
-    });
-
-    it("saves a new value when submitted", () => {
-      expect.hasAssertions();
-
-      const appointment = {
-        startsAt: availableTimeSlots[0],
-      };
-      render(
-        <AppointmentForm
-          {...testProps}
-          original={appointment}
-          onSubmit={({ startsAt }) =>
-            expect(startsAt).toEqual(availableTimeSlots[1].startsAt)
-          }
-        />
-      );
-
-      click(startsAtField(1));
-      click(submitButton());
-    });
+    itChecksAndSubmitsNewValue("startsAt", availableTimeSlots[1].startsAt, 1);
 
     it("filters appointments by selected stylist", () => {
       const availableTimeSlots = [
@@ -385,8 +355,8 @@ describe("AppointmentForm", () => {
     });
   });
 
-  it("sends request to POST /customers when submitting the form", async () => {
-    render(<AppointmentForm {...testProps} onSubmit={() => {}} />);
+  it("sends request to POST /appointments when submitting the form", async () => {
+    render(<AppointmentForm {...testProps} onSave={() => {}} />);
 
     await clickAndWait(submitButton());
 
@@ -394,5 +364,41 @@ describe("AppointmentForm", () => {
       "/appointments",
       expect.objectContaining({ method: "POST" })
     );
+  });
+
+  it("calls fetch with the right configuration", async () => {
+    render(<AppointmentForm {...testProps} onSave={() => {}} />);
+
+    await clickAndWait(submitButton());
+
+    expect(global.fetch).toBeCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        credentials: "same-origin",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+    );
+  });
+
+  it("notifies onSave when form is submitted", async () => {
+    render(<AppointmentForm {...testProps} onSave={saveSpy} />);
+    await clickAndWait(submitButton());
+
+    expect(saveSpy).toBeCalledWith();
+  });
+
+  describe("when Post request fails", () => {
+    beforeEach(() => {
+      global.fetch.mockResolvedValue(fetchResponseError());
+    });
+
+    it("does not notify onSave", async () => {
+      render(<AppointmentForm {...testProps} onSave={saveSpy} />);
+      await clickAndWait(submitButton());
+
+      expect(saveSpy).not.toBeCalled();
+    });
   });
 });

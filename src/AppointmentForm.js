@@ -121,7 +121,7 @@ export const AppointmentForm = ({
   salonClosesAt,
   today,
   availableTimeSlots,
-  onSubmit,
+  onSave,
 }) => {
   const [appointment, setAppointment] = useState(original);
 
@@ -156,9 +156,16 @@ export const AppointmentForm = ({
 
     const result = await global.fetch("/appointments", {
       method: "POST",
+      credentials: "same-origin",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(appointment),
     });
 
-    onSubmit(appointment);
+    if (result.ok) {
+      onSave();
+    }
   };
 
   return (

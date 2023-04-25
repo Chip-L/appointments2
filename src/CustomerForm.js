@@ -1,8 +1,5 @@
 import React, { useState } from "react";
-
-const Error = ({ hasError }) => (
-  <p role="alert">{hasError ? "An error occurred during save." : ""}</p>
-);
+import { Error } from "./Error";
 
 export const CustomerForm = ({ original, onSave }) => {
   const [customer, setCustomer] = useState(original);
