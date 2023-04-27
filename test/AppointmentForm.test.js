@@ -389,6 +389,18 @@ describe("AppointmentForm", () => {
     expect(saveSpy).toBeCalledWith();
   });
 
+  it("renders an alert space", async () => {
+    render(<AppointmentForm {...testProps} />);
+
+    expect(element("[role=alert]")).not.toBeNull();
+  });
+
+  it("initially has no text in the alert space", () => {
+    render(<AppointmentForm {...testProps} />);
+
+    expect(element("[role=alert]")).not.toContainText("error occurred");
+  });
+
   describe("when Post request fails", () => {
     beforeEach(() => {
       global.fetch.mockResolvedValue(fetchResponseError());
@@ -399,6 +411,23 @@ describe("AppointmentForm", () => {
       await clickAndWait(submitButton());
 
       expect(saveSpy).not.toBeCalled();
+    });
+
+    it("renders error message", async () => {
+      render(<AppointmentForm {...testProps} />);
+      await clickAndWait(submitButton());
+
+      expect(element("[role=alert]")).toContainText("error occurred");
+    });
+
+    it("clears the error state when resubmit is successful", async () => {
+      render(<AppointmentForm {...testProps} onSave={saveSpy} />);
+      await clickAndWait(submitButton());
+
+      global.fetch.mockResolvedValue(fetchResponseOk());
+      await clickAndWait(submitButton());
+
+      expect(element("[role=alert]")).not.toContainText("error occurred");
     });
   });
 });

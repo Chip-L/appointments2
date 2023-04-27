@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from "react";
+import { Error } from "./Error";
 
 const timeIncrements = (numTimes, startTime, increment) =>
   Array(numTimes)
@@ -124,6 +125,7 @@ export const AppointmentForm = ({
   onSave,
 }) => {
   const [appointment, setAppointment] = useState(original);
+  const [error, setError] = useState(false);
 
   const stylistForService = appointment.service
     ? serviceStylists[appointment.service]
@@ -165,11 +167,16 @@ export const AppointmentForm = ({
 
     if (result.ok) {
       onSave();
+      setError(false);
+    } else {
+      setError(true);
     }
   };
 
   return (
     <form onSubmit={handleSubmit}>
+      <Error hasError={error} />
+
       <label htmlFor="service">Services</label>
       <select
         id="service"
