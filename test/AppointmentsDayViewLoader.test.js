@@ -6,7 +6,7 @@ import {
 } from "./reactTestExtensions";
 import { AppointmentsDayView } from "../src/AppointmentsDayView";
 import { AppointmentsDayViewLoader } from "../src/AppointmentsDayViewLoader";
-import { today, todayAt } from "./builders/time";
+import { today, todayAt, tomorrow, tomorrowAt } from "./builders/time";
 import { fetchResponseOk } from "./builders/fetch";
 
 jest.mock("../src/AppointmentsDayView", () => ({
@@ -55,6 +55,19 @@ describe("AppointmentsDayViewLoader", () => {
 
     expect(AppointmentsDayView).toHaveBeenLastCalledWith(
       { appointments },
+      expect.anything()
+    );
+  });
+
+  it("re-requests appointment when today prop changes", async () => {
+    const from = tomorrowAt(0);
+    const to = tomorrowAt(23, 59, 59, 999);
+
+    await renderAndWait(<AppointmentsDayViewLoader today={today} />);
+    await renderAndWait(<AppointmentsDayViewLoader today={tomorrow} />);
+
+    expect(global.fetch).toHaveBeenLastCalledWith(
+      `/appointments/${from}-${to}`,
       expect.anything()
     );
   });
