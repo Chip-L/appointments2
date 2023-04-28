@@ -11,6 +11,8 @@ export const initializeReactContainer = () => {
 export const render = (component) =>
   act(() => ReactDOM.createRoot(container).render(component));
 
+export const renderAndWait = (component) => act(async () => render(component));
+
 export const click = (element) => act(() => element.click());
 
 export const clickAndWait = async (element) => act(async () => click(element));
