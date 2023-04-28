@@ -1,5 +1,5 @@
 import React from "react";
-import { Appointment, AppointmentsDayView } from "../src/AppointmentDayView";
+import { Appointment, AppointmentsDayView } from "../src/AppointmentsDayView";
 import {
   click,
   element,
