@@ -2,15 +2,13 @@ import React from "react";
 import {
   element,
   initializeReactContainer,
-  render,
+  renderAndWait,
 } from "./reactTestExtensions";
 import { AppointmentsDayView } from "../src/AppointmentsDayView";
 import { AppointmentsDayViewLoader } from "../src/AppointmentsDayViewLoader";
 
 jest.mock("../src/AppointmentsDayView", () => ({
-  AppointmentsDayView: jest.fn(() => (
-    <p id="AppointmentsDayView">AppointmentsDayView</p>
-  )),
+  AppointmentsDayView: jest.fn(() => <div id="AppointmentsDayView" />),
 }));
 
 describe("AppointmentsDayViewLoader", () => {
@@ -18,14 +16,13 @@ describe("AppointmentsDayViewLoader", () => {
     initializeReactContainer();
   });
 
-  it("renders an AppointmentsDayView", () => {
-    render(<AppointmentsDayViewLoader />);
-
+  it("renders an AppointmentsDayView", async () => {
+    await renderAndWait(<AppointmentsDayViewLoader />);
     expect(element("#AppointmentsDayView")).not.toBeNull();
   });
 
-  it("initially passes empty array of appointments to AppointmentsDayView", () => {
-    render(<AppointmentsDayViewLoader />);
+  it("initially passes empty array of appointments to AppointmentsDayView", async () => {
+    await renderAndWait(<AppointmentsDayViewLoader />);
 
     expect(AppointmentsDayView).toBeCalledWith(
       { appointments: [] },
