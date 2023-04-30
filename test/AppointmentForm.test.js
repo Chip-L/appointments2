@@ -17,15 +17,11 @@ import { AppointmentForm } from "../src/AppointmentForm";
 import { today, todayAt, tomorrowAt } from "./builders/time";
 import { fetchResponseError, fetchResponseOk } from "./builders/fetch";
 import { bodyOfLastFetchRequest } from "./spyHelpers";
+import { blankAppointment } from "./builders/appointment";
 
 const saveSpy = jest.fn();
 
 describe("AppointmentForm", () => {
-  const blankAppointment = {
-    service: "",
-    stylists: "",
-  };
-
   const availableTimeSlots = [
     {
       startsAt: todayAt(9),
@@ -48,6 +44,7 @@ describe("AppointmentForm", () => {
     selectableStylists: stylists,
     availableTimeSlots,
     original: blankAppointment,
+    // onSave: jest.fn(),
   };
 
   const labelsOfAllOptions = (element) =>
@@ -355,25 +352,16 @@ describe("AppointmentForm", () => {
     });
   });
 
-  it("sends request to POST /appointments when submitting the form", async () => {
-    render(<AppointmentForm {...testProps} onSave={() => {}} />);
-
-    await clickAndWait(submitButton());
-
-    expect(global.fetch).toBeCalledWith(
-      "/appointments",
-      expect.objectContaining({ method: "POST" })
-    );
-  });
-
+  // combined "sends request to POST /appointments when submitting the form" with next TC
   it("calls fetch with the right configuration", async () => {
     render(<AppointmentForm {...testProps} onSave={() => {}} />);
 
     await clickAndWait(submitButton());
 
     expect(global.fetch).toBeCalledWith(
-      expect.anything(),
+      "/appointments",
       expect.objectContaining({
+        method: "POST",
         credentials: "same-origin",
         headers: {
           "Content-Type": "application/json",
@@ -399,6 +387,22 @@ describe("AppointmentForm", () => {
     render(<AppointmentForm {...testProps} />);
 
     expect(element("[role=alert]")).not.toContainText("error occurred");
+  });
+
+  it("passes the customer id to fetch when submitting", async () => {
+    const appointment = {
+      ...blankAppointment,
+      customer: "123",
+    };
+    render(
+      <AppointmentForm {...testProps} original={appointment} onSave={saveSpy} />
+    );
+
+    await clickAndWait(submitButton());
+
+    expect(bodyOfLastFetchRequest()).toMatchObject({
+      customer: "123",
+    });
   });
 
   describe("when Post request fails", () => {

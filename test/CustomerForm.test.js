@@ -13,15 +13,10 @@ import {
 } from "./reactTestExtensions";
 import { bodyOfLastFetchRequest } from "./spyHelpers";
 import { fetchResponseOk, fetchResponseError } from "./builders/fetch";
+import { blankCustomer } from "./builders/customer";
 import { CustomerForm } from "../src/CustomerForm";
 
 describe("CustomerForm", () => {
-  const blankCustomer = {
-    firstName: "",
-    lastName: "",
-    phoneNumber: "",
-  };
-
   const testProps = {
     original: blankCustomer,
     onSave: () => {},
