@@ -65,3 +65,9 @@ export const field = (fieldName) => form().elements[fieldName];
 export const submitButton = () => element("input[type=submit]");
 
 export const labelFor = (fieldName) => element(`label[for=${fieldName}]`);
+
+export const propsOf = (mockComponent) => {
+  const lastCall =
+    mockComponent.mock.calls[mockComponent.mock.calls.length - 1];
+  return lastCall[0];
+};
