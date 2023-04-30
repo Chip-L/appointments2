@@ -25,16 +25,16 @@ describe("AppointmentsDayViewLoader", () => {
 
   it("renders an AppointmentsDayView", async () => {
     await renderAndWait(<AppointmentsDayViewLoader />);
+
     expect(element("#AppointmentsDayView")).not.toBeNull();
   });
 
   it("initially passes empty array of appointments to AppointmentsDayView", async () => {
     await renderAndWait(<AppointmentsDayViewLoader />);
 
-    expect(AppointmentsDayView).toBeCalledWith(
-      { appointments: [] },
-      expect.anything()
-    );
+    expect(AppointmentsDayView).toBeRenderedFirstWithProps({
+      appointments: [],
+    });
   });
 
   it("fetches data when component is mounted", async () => {
@@ -53,10 +53,7 @@ describe("AppointmentsDayViewLoader", () => {
   it("passes fetched appointments to AppointmentsDayView once they have loaded", async () => {
     await renderAndWait(<AppointmentsDayViewLoader />);
 
-    expect(AppointmentsDayView).toHaveBeenLastCalledWith(
-      { appointments },
-      expect.anything()
-    );
+    expect(AppointmentsDayView).toBeRenderedWithProps({ appointments });
   });
 
   it("re-requests appointment when today prop changes", async () => {
@@ -66,9 +63,6 @@ describe("AppointmentsDayViewLoader", () => {
     await renderAndWait(<AppointmentsDayViewLoader today={today} />);
     await renderAndWait(<AppointmentsDayViewLoader today={tomorrow} />);
 
-    expect(global.fetch).toHaveBeenLastCalledWith(
-      `/appointments/${from}-${to}`,
-      expect.anything()
-    );
+    expect(global.fetch).toBeRenderedWithProps(`/appointments/${from}-${to}`);
   });
 });
