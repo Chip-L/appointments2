@@ -4,10 +4,10 @@ import {
   initializeReactContainer,
   renderAndWait,
 } from "./reactTestExtensions";
-import { AppointmentsDayView } from "../src/AppointmentsDayView";
-import { AppointmentsDayViewLoader } from "../src/AppointmentsDayViewLoader";
 import { today, todayAt, tomorrow, tomorrowAt } from "./builders/time";
 import { fetchResponseOk } from "./builders/fetch";
+import { AppointmentsDayView } from "../src/AppointmentsDayView";
+import { AppointmentsDayViewLoader } from "../src/AppointmentsDayViewLoader";
 
 jest.mock("../src/AppointmentsDayView", () => ({
   AppointmentsDayView: jest.fn(() => <div id="AppointmentsDayView" />),
@@ -24,6 +24,10 @@ describe("AppointmentsDayViewLoader", () => {
   });
 
   it("renders an AppointmentsDayView", async () => {
+    AppointmentsDayView.mockImplementation(() => (
+      <div id="AppointmentsDayView" />
+    ));
+
     await renderAndWait(<AppointmentsDayViewLoader />);
 
     expect(element("#AppointmentsDayView")).not.toBeNull();
