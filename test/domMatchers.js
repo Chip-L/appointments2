@@ -1,5 +1,6 @@
 import { toBeElementWithTag } from "./matchers/toBeElementWithTag";
 import { toBeInputFieldOfType } from "./matchers/toBeInputFieldOfType";
+import { toBeRendered } from "./matchers/toBeRendered";
 import {
   toBeRenderedWithProps,
   toBeRenderedFirstWithProps,
@@ -10,6 +11,7 @@ import { toHaveClass } from "./matchers/toHaveClass";
 expect.extend({
   toBeElementWithTag,
   toBeInputFieldOfType,
+  toBeRendered,
   toBeRenderedFirstWithProps,
   toBeRenderedWithProps,
   toContainText,
