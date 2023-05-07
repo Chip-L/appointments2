@@ -1,6 +1,7 @@
 import React from "react";
 import {
   change,
+  changeAndWait,
   clickAndWait,
   element,
   field,
@@ -10,11 +11,13 @@ import {
   render,
   submitAndWait,
   submitButton,
+  withFocus,
 } from "./reactTestExtensions";
 import { bodyOfLastFetchRequest } from "./spyHelpers";
 import { fetchResponseOk, fetchResponseError } from "./builders/fetch";
 import { blankCustomer } from "./builders/customer";
 import { CustomerForm } from "../src/CustomerForm";
+import { assertAbstractType } from "graphql";
 
 describe("CustomerForm", () => {
   const testProps = {
@@ -135,87 +138,157 @@ describe("CustomerForm", () => {
     itSubmitsNewValue("phoneNumber", "720-555-9797");
   });
 
-  it("sends request to POST /customers when submitting the form", async () => {
-    render(<CustomerForm {...testProps} />);
+  describe("save", () => {
+    // combined "sends request to POST /customers when submitting the form" with the next
+    it("calls fetch with the right configuration", async () => {
+      render(<CustomerForm {...testProps} />);
 
-    await clickAndWait(submitButton());
+      await clickAndWait(submitButton());
 
-    expect(global.fetch).toBeCalledWith(
-      "/customers",
-      expect.objectContaining({ method: "POST" })
-    );
-  });
-
-  it("calls fetch with the right configuration", async () => {
-    render(<CustomerForm {...testProps} />);
-
-    await clickAndWait(submitButton());
-
-    expect(global.fetch).toBeCalledWith(
-      expect.anything(),
-      expect.objectContaining({
-        credentials: "same-origin",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-    );
-  });
-
-  it("notifies onSave when form is submitted", async () => {
-    const customer = { id: 123 };
-    global.fetch.mockResolvedValue(fetchResponseOk(customer));
-    const saveSpy = jest.fn();
-
-    render(<CustomerForm original={customer} onSave={saveSpy} />);
-    await clickAndWait(submitButton());
-
-    expect(saveSpy).toBeCalledWith(customer);
-  });
-
-  it("renders an alert space", async () => {
-    render(<CustomerForm {...testProps} />);
-
-    expect(element("[role=alert]")).not.toBeNull();
-  });
-
-  it("initially has no text in the alert space", () => {
-    render(<CustomerForm {...testProps} />);
-
-    expect(element("[role=alert]")).not.toContainText("error occurred");
-  });
-
-  describe("when Post request fails", () => {
-    beforeEach(() => {
-      global.fetch.mockResolvedValue(fetchResponseError());
+      expect(global.fetch).toBeCalledWith(
+        "/customers",
+        expect.objectContaining({
+          method: "POST",
+          credentials: "same-origin",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+      );
     });
 
-    it("does not notify onSave", async () => {
+    it("notifies onSave when form is submitted", async () => {
+      const customer = { id: 123 };
+      global.fetch.mockResolvedValue(fetchResponseOk(customer));
       const saveSpy = jest.fn();
 
-      render(<CustomerForm {...testProps} onSave={saveSpy} />);
+      render(<CustomerForm original={customer} onSave={saveSpy} />);
       await clickAndWait(submitButton());
 
-      expect(saveSpy).not.toBeCalled();
+      expect(saveSpy).toBeCalledWith(customer);
     });
 
-    it("renders error message", async () => {
+    it("renders an alert space", async () => {
       render(<CustomerForm {...testProps} />);
-      await clickAndWait(submitButton());
 
-      expect(element("[role=alert]")).toContainText("error occurred");
+      expect(element("[role=alert]")).not.toBeNull();
     });
 
-    it("clears the error state when resubmit is successful", async () => {
-      const customer = { id: 123 };
-
+    it("initially has no text in the alert space", () => {
       render(<CustomerForm {...testProps} />);
-      await clickAndWait(submitButton());
-
-      global.fetch.mockResolvedValue(fetchResponseOk(customer));
-      await clickAndWait(submitButton());
 
       expect(element("[role=alert]")).not.toContainText("error occurred");
+    });
+
+    describe("when Post request fails", () => {
+      beforeEach(() => {
+        global.fetch.mockResolvedValue(fetchResponseError());
+      });
+
+      it("does not notify onSave", async () => {
+        const saveSpy = jest.fn();
+
+        render(<CustomerForm {...testProps} onSave={saveSpy} />);
+        await clickAndWait(submitButton());
+
+        expect(saveSpy).not.toBeCalled();
+      });
+
+      it("renders error message", async () => {
+        render(<CustomerForm {...testProps} />);
+        await clickAndWait(submitButton());
+
+        expect(element("[role=alert]")).toContainText("error occurred");
+      });
+
+      it("clears the error state when resubmit is successful", async () => {
+        const customer = { id: 123 };
+
+        render(<CustomerForm {...testProps} />);
+        await clickAndWait(submitButton());
+
+        global.fetch.mockResolvedValue(fetchResponseOk(customer));
+        await clickAndWait(submitButton());
+
+        expect(element("[role=alert]")).not.toContainText("error occurred");
+      });
+    });
+  });
+
+  describe("validation", () => {
+    const errorFor = (fieldName) => element(`#${fieldName}Error[role=alert]`);
+
+    const itRendersAnAlertForFieldValidation = (fieldName) =>
+      it(`renders an alert space for ${fieldName} validation errors`, async () => {
+        render(<CustomerForm original={blankCustomer} />);
+
+        expect(errorFor(fieldName)).not.toBeNull();
+      });
+
+    const itSetsAlertAsAccessibleDescriptionForField = (fieldName) =>
+      it(`sets alert as the accessible description for the ${fieldName} field`, async () => {
+        render(<CustomerForm original={blankCustomer} />);
+
+        expect(field(fieldName).getAttribute("aria-describedby")).toEqual(
+          `${fieldName}Error`
+        );
+      });
+
+    const itInvalidatesFieldWithValue = (fieldName, value, description) =>
+      it(`displays error after blur when ${fieldName} field is '${value}'`, async () => {
+        render(<CustomerForm original={blankCustomer} />);
+
+        withFocus(field(fieldName), () => change(field(fieldName, value)));
+
+        expect(errorFor(fieldName)).toContainText(description);
+      });
+
+    const itInitiallyHasNoTextInTheAlertSpace = (fieldName) =>
+      it(`initially has no text in the ${fieldName} field alert space`, async () => {
+        render(<CustomerForm original={blankCustomer} />);
+
+        expect(errorFor(fieldName).textContent).toEqual("");
+      });
+
+    describe("firstName", () => {
+      itRendersAnAlertForFieldValidation("firstName");
+      itSetsAlertAsAccessibleDescriptionForField("firstName");
+      itInvalidatesFieldWithValue("firstName", " ", "First name is required");
+      itInitiallyHasNoTextInTheAlertSpace("firstName");
+    });
+
+    describe("lastName", () => {
+      itRendersAnAlertForFieldValidation("lastName");
+      itSetsAlertAsAccessibleDescriptionForField("lastName");
+      itInvalidatesFieldWithValue("lastName", " ", "Last name is required");
+      itInitiallyHasNoTextInTheAlertSpace("lastName");
+    });
+
+    describe("phoneNumber", () => {
+      itRendersAnAlertForFieldValidation("phoneNumber");
+      itSetsAlertAsAccessibleDescriptionForField("phoneNumber");
+      itInvalidatesFieldWithValue(
+        "phoneNumber",
+        " ",
+        "Phone number is required"
+      );
+      it.skip("displays error after blur when phoneNumber field is 'invalid'", () => {});
+      // itInvalidatesFieldWithValue(
+      //   "phoneNumber",
+      //   "invalid",
+      //   "Only numbers, spaces and these symbols are allowed: () + -"
+      // );
+      itInitiallyHasNoTextInTheAlertSpace("phoneNumber");
+
+      it("accepts standard phone number characters when validating", async () => {
+        render(<CustomerForm original={blankCustomer} />);
+
+        withFocus(field("phoneNumber"), () =>
+          change(field("phoneNumber"), "0123456789+()- ")
+        );
+
+        expect(errorFor("phoneNumber")).not.toContainText("Only numbers");
+      });
     });
   });
 });
