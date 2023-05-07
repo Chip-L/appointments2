@@ -1,10 +1,8 @@
-- Preface xv
-
 # Part 1 – Exploring the TDD Workflow
 
 - [x] 1 - First Steps with Test-Driven Development 3
 
-  - Technical requirements 4
+  - [x] Technical requirements 4
 
   - [x] Creating a new React project from scratch 4
 
@@ -38,11 +36,11 @@
 
     - [x] Streamlining your testing process 29
 
-  - Summary 30
+  - [x] Summary 30
 
 - [x] 2 - Rendering Lists and Detail Views 33
 
-  - Technical requirements 34
+  - [x] Technical requirements 34
 
   - [x] Sketching a mock-up 34
 
@@ -62,15 +60,13 @@
 
     - [x] Putting it all together with webpack 51
 
-  - Summary 54
+  - [x] Summary 54
 
   - [x] Exercises 54
 
-  - Further reading 55
-
 - [x] 3 - Refactoring the Test Suite 57
 
-  - Technical requirements 58
+  - [x] Technical requirements 58
 
   - [x] Pulling out reusable rendering logic 58
 
@@ -78,15 +74,13 @@
 
   - [x] Extracting DOM helpers 70
 
-  - Summary 73
+  - [x] Summary 73
 
   - [x] Exercises 73
 
-  - Further reading 74
-
 - [x] 4 - Test-Driving Data Input 75
 
-  - Technical requirements 75
+  - [x] Technical requirements 75
 
   - [x] Adding a form element 76
 
@@ -112,13 +106,13 @@
 
     - [x] Testing it out 100
 
-  - Summary 101
+  - [x] Summary 101
 
   - [x] Exercises 101
 
 - [x] 5 - Adding Complex Form Interactions 103
 
-  - Technical requirements 103
+  - [x] Technical requirements 103
 
   - [x] Choosing a value from a select box 104
 
@@ -148,13 +142,13 @@
 
     - [x] Extracting a test props object 140
 
-  - Summary 144
+  - [x] Summary 144
 
   - [x] Exercises 145
 
 - [x] 6 - Exploring Test Doubles 147
 
-  - Technical requirements 148
+  - [x] Technical requirements 148
 
   - [x] What is a test double? 148
 
@@ -196,13 +190,13 @@
 
     - [x] Extracting fetch test functionality 182
 
-  - Summary 184
+  - [x] Summary 184
 
   - [x] Exercises 184
 
 - [x] 7 - Testing useEffect and Mocking Components 185
 
-  - Technical requirements 185
+  - [x] Technical requirements 185
 
   - [x] Mocking child components 186
 
@@ -232,13 +226,13 @@
 
     - [x] Alternatives to module mocks 206
 
-  - Summary 207
+  - [x] Summary 207
 
   - [x] Exercises 207
 
 - [x] 8 - Building an Application Component 209
 
-  - Technical requirements 209
+  - [x] Technical requirements 209
 
   - [x] Formulating a plan 210
 
@@ -256,7 +250,7 @@
 
 - [ ] 9 - Form Validation 231
 
-  - Technical requirements 231
+  - [x] Technical requirements 231
 
   - [x] Performing client-side validation 232
 
@@ -342,7 +336,7 @@
 
 - [ ] 12 - Test-Driving Redux 313
 
-  - Technical requirements 314
+  - [ ] Technical requirements 314
 
   - [ ] Up-front design for a reducer and a saga 314
 
@@ -540,6 +534,6 @@
 
   - [ ] Summary 523
 
-- Index 525
+# Index 525
 
-- Other Books You May Enjoy 53
+# Other Books You May Enjoy 538
