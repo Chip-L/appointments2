@@ -1,19 +1,13 @@
 import React, { useState } from "react";
 import { Error } from "./Error";
-
-const required = (description) => (value) =>
-  !value || value.trim() === "" ? description : undefined;
-
-const match = (re, description) => (value) =>
-  !value.match(re) ? description : undefined;
-
-const list =
-  (...validators) =>
-  (value) =>
-    validators.reduce(
-      (result, validator) => result || validator(value),
-      undefined
-    );
+import {
+  required,
+  list,
+  match,
+  validateMany,
+  anyErrors,
+  hasError,
+} from "./formValidation";
 
 export const CustomerForm = ({ original, onSave }) => {
   const [validationErrors, setValidationErrors] = useState({});
@@ -41,26 +35,17 @@ export const CustomerForm = ({ original, onSave }) => {
   };
 
   const handleBlur = ({ target }) => {
-    const result = validators[target.name](target.value);
-    setValidationErrors({ ...validationErrors, [target.name]: result });
+    const result = validateMany(validators, {
+      [target.name]: target.value,
+    });
+
+    setValidationErrors({ ...validationErrors, ...result });
   };
-
-  const validateMany = (fields) =>
-    Object.entries(fields).reduce(
-      (result, [name, value]) => ({
-        ...result,
-        [name]: validators[name](value),
-      }),
-      {}
-    );
-
-  const anyErrors = (errors) =>
-    Object.values(errors).some((error) => error !== undefined);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    const validationResult = validateMany(customer);
+    const validationResult = validateMany(validators, customer);
 
     if (!anyErrors(validationResult)) {
       const result = await global.fetch("/customers", {
@@ -84,11 +69,9 @@ export const CustomerForm = ({ original, onSave }) => {
     }
   };
 
-  const hasError = (fieldName) => validationErrors[fieldName] !== undefined;
-
   const renderError = (fieldName) => (
     <span id={`${fieldName}Error`} role="alert">
-      {hasError(fieldName) ? validationErrors[fieldName] : ""}
+      {hasError(validationErrors, fieldName) ? validationErrors[fieldName] : ""}
     </span>
   );
 
