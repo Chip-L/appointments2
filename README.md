@@ -258,7 +258,7 @@
 
     - [x] ~~Generalizing validation for multiple fields 237~~
 
-    - [ ] Submitting the form 246
+    - [x] ~~Submitting the form 246~~
 
     - [ ] Extracting non-React functionality into a new module 249
 

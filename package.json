@@ -2,7 +2,7 @@
   "name": "appointments",
   "version": "1.0.0",
   "description": "TDD exercise from book Mastering React TDD",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "build": "npm run build-server && webpack",
     "build-server": "webpack --config webpack-server.config.js",

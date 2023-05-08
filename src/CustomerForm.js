@@ -28,50 +28,59 @@ export const CustomerForm = ({ original, onSave }) => {
     }));
   };
 
-  const handleBlur = ({ target }) => {
-    const validators = {
-      firstName: required("First name is required"),
-      lastName: required("Last name is required"),
-      phoneNumber: list(
-        required("Phone number is required"),
-        match(
-          /^[0-9+()\- ]*$/,
-          "Only numbers, spaces and these symbols are allowed: ( ) + -"
-        )
-      ),
-    };
+  const validators = {
+    firstName: required("First name is required"),
+    lastName: required("Last name is required"),
+    phoneNumber: list(
+      required("Phone number is required"),
+      match(
+        /^[0-9+()\- ]*$/,
+        "Only numbers, spaces and these symbols are allowed: ( ) + -"
+      )
+    ),
+  };
 
+  const handleBlur = ({ target }) => {
     const result = validators[target.name](target.value);
     setValidationErrors({ ...validationErrors, [target.name]: result });
-
-    const fieldName = target.name;
-    console.log({
-      value: target.value,
-      fieldName,
-      hasError: hasError(fieldName),
-      validationErrors: validationErrors[fieldName],
-      result,
-    });
   };
+
+  const validateMany = (fields) =>
+    Object.entries(fields).reduce(
+      (result, [name, value]) => ({
+        ...result,
+        [name]: validators[name](value),
+      }),
+      {}
+    );
+
+  const anyErrors = (errors) =>
+    Object.values(errors).some((error) => error !== undefined);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    const result = await global.fetch("/customers", {
-      method: "POST",
-      credentials: "same-origin",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(customer),
-    });
+    const validationResult = validateMany(customer);
 
-    if (result.ok) {
-      const customerWithId = await result.json();
-      onSave(customerWithId);
-      setError(false);
+    if (!anyErrors(validationResult)) {
+      const result = await global.fetch("/customers", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(customer),
+      });
+
+      if (result.ok) {
+        const customerWithId = await result.json();
+        onSave(customerWithId);
+        setError(false);
+      } else {
+        setError(true);
+      }
     } else {
-      setError(true);
+      setValidationErrors(validationResult);
     }
   };
 
